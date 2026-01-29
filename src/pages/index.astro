@@ -1,9 +1,10 @@
 ---
-let date, name;
+let date = "", name = "", open = false;
 
 interface WRSEndpoint {
 	date: string
 	name: string;
+	open: boolean;
 }
 
 try {
@@ -11,9 +12,7 @@ try {
 	const data = await response.json() as WRSEndpoint;
 	date = data.date;
 	name = data.name;
-} catch (e) {
-	date = "?"
-	name = "?";
+	open = data.open;
 }
 ---
 
@@ -32,8 +31,8 @@ try {
 	</head>
 	<body>
 		<div>
-			<h1>TAK</h1>
-			<p>Klucz odebrany o {date} przez {name}.</p>
+			<h1>{open ? "TAK" : "NIE"}</h1>
+			{ open && <p>Klucz odebrany o {date} przez {name}.</p> }
 		</div>
 	</body>
 </html>

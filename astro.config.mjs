@@ -6,7 +6,7 @@ import cloudflare from "@astrojs/cloudflare";
 // https://astro.build/config
 export default defineConfig({
 	site: "https://wrs.akinom.dev",
-	output: 'server',
+	// output: 'server',
 	adapter: cloudflare({
 		platformProxy: {
 			enabled: true,

@@ -1,76 +1,68 @@
 ---
-export const prerender = false;
-
-let date = "", name = "", open = false;
-
-interface WRSEndpoint {
-	date: string
-	name: string;
-	open: boolean;
-}
-
-try {
-	const response = await fetch("https://limbo.api.akinom.dev/wrs");
-	const data = await response.json() as WRSEndpoint;
-	date = data.date;
-	name = data.name;
-	open = data.open;
-} catch (_e) {
-	console.error("Zjebał się ISOD :(")
-}
+// We keep the layout, but remove the server-side fetch
+// We can set default values here to show while loading
+const title = "Czy WRS jest otwarty?";
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Czy WRS jest otwarty?</title>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+        </head>
+    <body>
+        <div>
+            <h1 id="status-text">...</h1>
+            <p id="details-text" style="display: none;">Klucz odebrany o <span id="date"></span> przez <span id="name"></span>.</p>
+        </div>
 
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap" rel="stylesheet">
-	</head>
-	<body>
-		<div>
-			<h1>{open ? "TAK" : "NIE"}</h1>
-			{ open && <p>Klucz odebrany o {date} przez {name}.</p> }
-		</div>
-	</body>
+        <script>
+			interface WRSEndpoint {
+				date: string;
+				name: string;
+				open: boolean;
+			}
+
+
+            async function checkStatus() {
+                try {
+                    const response = await fetch("https://limbo.api.akinom.dev/wrs");
+                    const data = await response.json() as WRSEndpoint;
+                    
+                    const statusText = document.getElementById('status-text')!;
+                    const detailsText = document.getElementById('details-text')!;
+                    const dateSpan = document.getElementById('date')!;
+                    const nameSpan = document.getElementById('name')!;
+
+                    if (data.open) {
+                        statusText.innerText = "TAK";
+                        dateSpan.innerText = data.date;
+                        nameSpan.innerText = data.name;
+                        detailsText.style.display = "block";
+                    } else {
+                        statusText.innerText = "NIE";
+                        detailsText.style.display = "none";
+                    }
+                } catch (e) {
+                    console.error("API Error", e);
+                    document.getElementById('status-text')!.innerText = "BŁĄD";
+                }
+            }
+
+            // Run immediately on load
+            checkStatus();
+            
+            // Optional: Auto-refresh every 60 seconds
+            // setInterval(checkStatus, 60000);
+        </script>
+    </body>
 </html>
 
 <style>
-	body {
-		font-family: "Lexend Deca", sans-serif;
-		margin: 0;
-		font-optical-sizing: auto;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		height: 100vh;
-	}
-
-	h1 {
-		font-size: 30vw;
-		margin: 0;
-	}
-
-	p {
-		margin: 0;
-	}
-
-	body {
-		background-color: #eee;
-		color: #222;
-	}
-
-	@media (prefers-color-scheme: dark) {
-		body {
-			background-color: #222;
-			color: #eee;
-		}
-
+    body { font-family: "Lexend Deca", sans-serif; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background-color: #eee; color: #222; }
+    h1 { font-size: 30vw; margin: 0; }
+    p { margin: 0; }
+    @media (prefers-color-scheme: dark) { body { background-color: #222; color: #eee; } }
 </style>
